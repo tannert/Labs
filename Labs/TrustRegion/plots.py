@@ -1,9 +1,14 @@
+# plots.py
+# used to generate the plots for TrustRegion.tex
+
 import matplotlib
 matplotlib.rcParams = matplotlib.rc_params_from_file('../../matplotlibrc')
 
 import numpy as np
 from matplotlib import pyplot as plt
 from math import sqrt
+
+
 
 def dogleg():
     # on the first segment
