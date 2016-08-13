@@ -18,12 +18,12 @@ def qr_gram_schmidt(A):
     m,n = A.shape
     Q = np.copy(A).astype(np.float)
     R = np.zeros((n,n))
-    for i in xrange(n):
+    for i in range(n):
         R[i,i] = la.norm(Q[:,i])
         Q[:,i] /= R[i,i]
         for j in range(i+1,n):
             R[i,j] = np.dot(Q[:,j].T, Q[:,i])
-            Q[:,j] = Q[:,j] - R[i,j]*Q[:,i]
+            Q[:,j] -= R[i,j]*Q[:,i]
     return Q, R
 
 
@@ -61,7 +61,7 @@ def solve(A, b):
 
     # Use back substitution to solve Rx = y.
     x = np.zeros(n)
-    for k in reversed(xrange(n)):
+    for k in reversed(range(n)):
         x[k] = (y[k] - np.dot(R[k,k:], x[k:])) / R[k,k]
 
     return x
@@ -81,9 +81,9 @@ def qr_householder(A):
         R ((m,n) ndarray): An upper triangular matrix.
     """
     m,n = A.shape
-    R = np.copy(A)
+    R = np.copy(A).astype(np.float)
     Q = np.identity(m)
-    for k in xrange(n):
+    for k in range(n):
         u = np.copy(R[k:,k])
         u[0] += sign(u[0])*la.norm(u)
         u /= la.norm(u)
@@ -95,26 +95,26 @@ def qr_householder(A):
 # Problem 5
 def hessenberg(A):
     """Compute the Hessenberg form H of A, along with the orthonormal matrix Q
-    such that A = (Q^T)HQ.
+    such that A = QHQ^T.
 
     Inputs:
         A ((n,n) ndarray): An invertible matrix.
 
     Returns:
+        H ((n,n) ndarray): The upper Hessenberg form of A.
         Q ((n,n) ndarray): An orthonormal matrix.
-        H ((n,n) ndarray): The upper hessenberg form of A.
     """
     m,n = A.shape
-    H = np.copy(A)
+    H = np.copy(A).astype(np.float)
     Q = np.identity(m)
-    for k in xrange(n-2):
+    for k in range(n-2):
         u = np.copy(H[k+1:,k])
         u[0] += sign(u[0])*la.norm(u)
         u /= la.norm(u)
         H[k+1:,k:] -= 2*np.outer(u, np.dot(u, H[k+1:,k:]))
         H[:,k+1:] -= 2*np.outer(np.dot(H[:,k+1:], u), u)
         Q[k+1:] -= 2*np.outer(u, np.dot(u, Q[k+1:]))
-    return Q, H
+    return H, Q.T
 
 
 # Additional Material
@@ -130,10 +130,10 @@ def qr_givens(A):
         R ((n,n) ndarray): An upper triangular matrix.
     """
     m,n = A.shape
-    R = np.copy(A)
+    R = np.copy(A).astype(np.float)
     Q = np.identity(m)
     for j in range(n):
-        for i in reversed(xrange(j+1,m)):
+        for i in reversed(range(j+1,m)):
             a,b = R[i-1,j], R[i,j]
             G = np.array([[a,b],[-b,a]]) / np.sqrt(a**2+b**2)
             R[i-1:i+1,j:] = np.dot(G, R[i-1:i+1,j:])
@@ -153,12 +153,10 @@ def qr_givens_hessenberg(H):
         R ((n,n) ndarray): An upper triangular matrix.
     """
     m,n = H.shape
-    R = np.copy(H)
+    R = np.copy(H).astype(np.float)
     Q = np.identity(m)
-    for j in xrange(n):
+    for j in xrange(min(n, m-1)):
         i = j+1
-        if i >= m:
-            break
         a,b = R[i-1,j],R[i,j]
         G = np.array([[a,b],[-b,a]]) / np.sqrt(a**2+b**2)
         R[i-1:i+1,j:] = np.dot(G, R[i-1:i+1,j:])
