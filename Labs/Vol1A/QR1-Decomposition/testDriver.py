@@ -1,5 +1,5 @@
 # testDriver.py
-"""Volume I: QR 1 (Decomposition). Test driver."""
+"""Volume 1A: QR 1 (Decomposition). Test driver."""
 
 # Decorator ===================================================================
 
@@ -248,14 +248,14 @@ class _testDriver(object):
             A = self._qrTestCase(n,n)
             stu = s.hessenberg(A.copy())
             try:
-                Q,H = stu
+                H,Q = stu
             except(TypeError, ValueError):
                 raise ValueError("hessenberg() failed to return two arrays")
 
             pts = 5
             if not all(np.allclose(*x) for x in [(np.triu(H, -1), H),
                                         (np.eye(Q.shape[1]), np.dot(Q.T, Q)),
-                                                (A, np.dot(Q.T, H.dot(Q)))]):
+                                                (A, np.dot(Q, H.dot(Q.T)))]):
                 pts = 3
                 self.feedback += "\n\n{}\nA =\n{}".format('- '*20, A)
                 if not np.allclose(np.triu(H, -1), H):
@@ -264,7 +264,7 @@ class _testDriver(object):
                 if not np.allclose(np.eye(Q.shape[1]), np.dot(Q.T, Q)):
                     self.feedback += "\nQ not orthonormal:\n{}".format(Q)
                     pts -= 2
-                pts += 2*self._eqTest(A, np.dot(Q.T, H.dot(Q)), "A != (Q^T)HQ")
+                pts += 2*self._eqTest(A, np.dot(Q, H.dot(Q.T)), "A != QHQ^T")
             return pts
 
         points = _test(4) + _test(10)

@@ -5,6 +5,8 @@
 \objective{The QR decomposition is a fundamentally important matrix factorization.
 It is straightforward to implement, is numerically stable, and provides the basis of several important algorithms.
 In this lab, we explore several ways to produce the QR decomposition and implement a few immediate applications.
+\\ \indent We restrict our discussion to real matrices.
+However, the results and algorithms presented here can be extended to complex matrices by replacing ``transpose'' with ``hermitian conjugate'' and ``symmetric matrix'' with ``hermitian matrix.''
 }
 
 The QR decomposition of a matrix $A$ is a factorization $A=QR$, where $Q$ is  has orthonormal columns and $R$ is upper triangular.
@@ -51,9 +53,6 @@ Q\ (m \times m) & R\ (m \times n) & \\
 \end{array}
 \end{align*}
 
-We assume throughout this lab that $A$ contains only real numbers.
-However, the results and algorithms presented here can be extended to complex matrices by replacing ``transpose'' with ``hermitian conjugate'' and ``symmetric matrix'' with ``hermitian matrix.''
-
 \section*{QR via Gram-Schmidt} % ==============================================
 
 The \emph{classical Gram-Schmidt algorithm} takes a linearly independent set of vectors and constructs an orthonormal set of vectors with the same span.
@@ -93,8 +92,8 @@ Appending $m - n$ rows of zeros to $\widehat{R}$ results in $R$.
 
 \subsection*{Modified Gram-Schmidt} % -----------------------------------------
 
-When implemented with a computer, the Gram-Schmidt algorithm may produce a set of vectors $\{\q_j\}_{j=1}^n$ that are not even close to orthonormal due to rounding errors.
-The \emph{modified Gram-Schmidt algorithm} is a slight variant of the classical algorithm which consistently produces a set of vectors that are ``very close'' to orthonormal.
+If the columns of $A$ are close to being linearly dependent, the classical Gram-Schmidt algorithm often produces a set of vectors $\{\q_j\}_{j=1}^n$ that are not even close to orthonormal due to rounding errors.
+The \emph{modified Gram-Schmidt algorithm} is a slight variant of the classical algorithm which more consistently produces a set of vectors that are ``very close'' to orthonormal.
 
 Let $\q_1$ be the normalization of $\x_1$ as before.
 Instead of making just $\x_2$ orthogonal to $\q_1$, make \emph{each} of the vectors $\{\x_j\}_{j=2}^n$ orthogonal to $\q_1$:
@@ -276,7 +275,7 @@ The \emph{orthogonal complement} of a nonzero vector $\v \in \mathbb{R}^n$ is th
 A \emph{Householder transformation} is a linear transformation that reflects a vector $\x$ across the orthogonal complement $\v^\perp$ for some specified $\v$.
 
 The matrix representation of the Householder transformation corresponding to $\v$ is given by $H_{\v} = I - 2\frac{\v\v\trp}{\v\trp\v}$.
-Since $H_{\v}\trp H_{\v} = I$, Householder transformations are orthonormal (can you prove it?).
+Since $H_{\v}\trp H_{\v} = I$, Householder transformations are orthonormal.
 
 \begin{figure}[H]
 \centering
@@ -408,7 +407,6 @@ Use Algorithm \ref{Alg:QR-via-Householder} to compute the full QR decomposition 
 Consider the following implementation details.
 \begin{itemize}
 
-\item
 \item NumPy's \li{np.sign()} is an easy way to implement the $\sign()$ operation in step \ref{step:HH-sign}.
 However, \li{np.sign(0)} returns $0$, which will cause a problem in the rare case that $u_0 = 0$ (which is possible if the top left entry of $A$ is $0$ to begin with).
 The following code defines a function that returns the sign of a single number, counting $0$ as positive.
@@ -635,6 +633,25 @@ sign = lambda x: 1 if np.real(x) >= 0 else -1
 
 \end{enumerate}
 
+\subsection*{QR with Pivoting} % ----------------------------------------------
+
+The LU decomposition can be improved by employing Gaussian elimination with partial pivoting, where the rows of $A$ are strategically permuted at each iteration.
+The QR factorization can be similarly improved by permuting the columns of $A$ at each iteration.
+The result is the factorization $AP = QR$, where $P$ is a permutation matrix that encodes the column swaps.
+SciPy's \li{scipy.linalg.qr()} can compute the pivoted QR decomposition.
+
+\begin{lstlisting}
+# Get the decomposition AP = QR for a random matrix A.
+>>> A = np.random.random((8,10))
+>>> Q,R,P = la.qr(A, pivoting=True)
+
+# P is returned as a 1-D array that encodes column ordering,
+# so A can be reconstructed with fancy indexing.
+>>> np.allclose(Q.dot(R), A[:,P])
+True
+\end{lstlisting}
+
+\begin{comment}
 \subsection*{Stability of the QR Decomposition in SciPy} % --------------------
 
 SciPy's QR factorization routine uses Householder reflections.
@@ -675,6 +692,7 @@ The error in $A_1$, called the \emph{backward error}, is very small.
 This shows that the errors in $Q_1$ and $R_1$ are somehow ``correlated,'' so that they cancel out in the product.
 In fact, the large errors in $Q_1$ and $R_1$ are not because the algorithm is bad, but rather because $A$ was \emph{poorly conditioned} to begin with.
 Conditioning and stability will be discussed more in depth later in the curriculum.
+\end{comment}
 
 \subsection*{QR via Givens} % -------------------------------------------------
 
@@ -689,7 +707,7 @@ R_\theta =
 \end{array}\right]
 \]
 
-This transformation is orthonormal (can you prove it?).
+This transformation is orthonormal.
 Given $\x = \left[a, b\right]\trp$, if $\theta$ is the angle between $\x$ and $\e_1$, then $R_{-\theta}$ maps $\x$ to the span of $\e_1$.
 
 \begin{figure}[H]
