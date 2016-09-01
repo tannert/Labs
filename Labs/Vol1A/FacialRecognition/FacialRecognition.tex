@@ -1,7 +1,7 @@
 \lab{Facial Recognition Using Eigenfaces}{Facial Recognition Using Eigenfaces}
 \label{lab:FacialRecognition}
 
-\objective{Use the singular value decomposition to implement a simple facial recognition system.}
+\objective{Obtain a third-party dataset of images of human faces. Compute and visualize the mean face from the dataset. Learn about the method of Principle Component Analysis and how it relates to the Singular Value Decomposition. Compute the principal components, or eigenfaces, of the mean-shifted faces in the dataset. Implement a simple facial recognition system using these eigenfaces.}
 
 Suppose we have a large database containing images of human faces.
 We would like to identify people by comparing their pictures to those in the database.
@@ -186,7 +186,7 @@ Therefore, the best $s$-dimensional subspace for solving the facial recognition 
 
 \subsection*{The Proof: SVD as a Least Squares Solution}
 \begin{theorem}
-Let $\f_1, \ldots, \f_k$ be vectors on $\mathbb{R}^{mn}$, and let $\bar{F} = [\bar{f}_1 \; \ldots \; \bar{f}_k]$. Suppose $U\Sigma V^T$ is an SVD for $\bar{F}$. Then the $s$-dimensional subspace that solves the least squares problem for $\f_1, \ldots, \f_k$ is the span of the first $s$ columns of $U$. If $U_s$ is the first $s$ columns of $U$, then the matrix $U_sU_s^T$ is projection onto this subspace.
+Let $\f_1, \ldots, \f_k$ be vectors on $\mathbb{R}^{mn}$, and let $\bar{F} = [\bar{f}_1 \; \ldots \; \bar{f}_k]$. Suppose $U\Sigma V^T$ is an SVD for $\bar{F}$. Then the $s$-dimensional subspace that solves the least squares problem for $\f_1, \ldots, \f_k$ is the span of the first $s$ columns of $U$. If $U_s$ is the first $s$ columns of $U$, then the matrix $U_sU_s^T$ is the projection onto this subspace.
 \end{theorem}
 \begin{proof}
 We seek a rank-$s$ projection matrix $P_s$ so that $\sum_{i=1}^k \|P_s\bar{\f}_i - \bar{\f}_i\|_2^2$ is minimized---i.e.,
@@ -212,9 +212,9 @@ Since $P_s \bar{F}$ will always have rank $s$ or less, the projection $P_s =  \s
 If we let $U_s = [ \u_1\; \ldots \; \u_s]$, then we may write $P_s = U_sU_s^T$. Notice that $P_s$ is projection onto the subspace spanned by the columns of $U_s$.
 \end{proof}
 
-The $s$ basis vectors $\u_1, \ldots, \u_s$ are eigenvectors of $\bar{F}\bar{F}^T$.
+The $s$ basis vectors $\u_1, \ldots, \u_s$ are eigenvectors of $\bar{F}\bar{F}^T$, and are known as the \emph{principal components} of $\bar{F}.
 They also resemble face images.
-Hence they are commonly called the ``eigenfaces." 
+Hence, they are commonly called the ``eigenfaces".
 
 \begin{problem}
 \label{prob:svd}
@@ -333,7 +333,7 @@ See Figure \ref{facialRecognition:rebuiltImage} for examples of reconstructed fa
 \end{comment}
 
 \section*{Match Faces}
-Finally, we are ready to identify which mean-shifted image $\bar{\f}_i$ is closest to an inputed image, $\bar{\g}$. 
+Finally, we are ready to identify which mean-shifted image $\bar{\f}_i$ is closest to an inputted image, $\bar{\g}$. 
 We begin by projecting all vectors to some $s$-dimensional subspace and writing them in terms of the basis vectors, which are the eigenfaces. 
 This is done by multiplying by the change-of-basis matrix:
 \[
